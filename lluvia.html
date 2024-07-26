@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Rain Animation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+        #rain-canvas {
+            display: block;
+            background: linear-gradient(to bottom, #1a1a2e, #16213e);
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <canvas id="rain-canvas"></canvas>
+    <div id="controls" class="text-white">
+        <label for="raindrop-count">Raindrops: </label>
+        <input type="range" id="raindrop-count" min="100" max="1000" value="500" class="w-32">
+        <span id="count-value">500</span>
+    </div>
+    <script>
+        const canvas = document.getElementById('rain-canvas');
+        const ctx = canvas.getContext('2d');
+        const raindropCountSlider = document.getElementById('raindrop-count');
+        const countValue = document.getElementById('count-value');
+
+        let raindrops = [];
+        let animationId;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Raindrop {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.length = Math.random() * 20 + 10;
+                this.speed = Math.random() * 5 + 2;
+                this.thickness = Math.random() * 1.5 + 0.5;
+            }
+
+            update() {
+                this.y += this.speed;
+                if (this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x, this.y + this.length);
+                ctx.strokeStyle = `rgba(174, 194, 224, ${Math.random() * 0.5 + 0.5})`;
+                ctx.lineWidth = this.thickness;
+                ctx.stroke();
+            }
+        }
+
+        function createRaindrops(count) {
+            raindrops = [];
+            for (let i = 0; i < count; i++) {
+                raindrops.push(new Raindrop());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            raindrops.forEach(raindrop => {
+                raindrop.update();
+                raindrop.draw();
+            });
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function handleResize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            createRaindrops(raindropCountSlider.value);
+        }
+
+        raindropCountSlider.addEventListener('input', (e) => {
+            const count = e.target.value;
+            countValue.textContent = count;
+            createRaindrops(count);
+        });
+
+        window.addEventListener('resize', handleResize);
+
+        createRaindrops(500);
+        animate();
+    </script>
+</body>
+</html>
